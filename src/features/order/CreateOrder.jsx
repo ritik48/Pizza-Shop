@@ -1,8 +1,12 @@
-import { useState } from "react";
 import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { createOrder } from "../../services/apiRestaurant";
 import Button from "../../ui/Button";
+import store from "../../store";
+
+import { clearCart } from "../cart/cartSlice";
+
 
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
@@ -40,8 +44,7 @@ function CreateOrder() {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
-  const cart = fakeCart;
-
+  const cart = useSelector((state) => state.cart.cart)
   const formErrors = useActionData();
 
   return (
@@ -134,6 +137,11 @@ export async function action({ request }) {
   if (Object.keys(errors).length > 0) return errors;
 
   const newOrder = await createOrder(order);
+
+  // we cannot use hooks inside here as it's not a component,
+  // so we will use directly 'redux store' to invoke the action function
+  store.dispatch(clearCart());
+
   return redirect(`/order/${newOrder.id}`);
 }
 
