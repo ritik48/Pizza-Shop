@@ -26,6 +26,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchAddress.fulfilled, (state, action) => {
         state.status = "idle";
+        state.error = "";
         state.position = action.payload.position;
         state.address = action.payload.address;
       })

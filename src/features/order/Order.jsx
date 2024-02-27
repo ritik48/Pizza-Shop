@@ -1,13 +1,14 @@
 // Test ID: IIDSAT
-
-import { useLoaderData } from "react-router-dom";
-import { getOrder } from "../../services/apiRestaurant";
+import Button from "../../ui/Button";
+import { useFetcher, useLoaderData } from "react-router-dom";
+import { getOrder, updateOrder } from "../../services/apiRestaurant";
 import {
   calcMinutesLeft,
   formatCurrency,
   formatDate,
 } from "../../utils/helpers";
 import OrderItem from "./OrderItem";
+import { useEffect } from "react";
 
 function Order() {
   const order = useLoaderData();
@@ -21,6 +22,32 @@ function Order() {
     cart,
   } = order;
   const deliveryIn = calcMinutesLeft(estimatedDelivery);
+
+  // const [loading, setLoading] = useState(false);
+  // const [menu, setMenu] = useState([])
+
+  // getting menu so that we could show ingredients
+  // Now, we also have one route which loads the menu , so instead of below approach we can also use
+  // useFetcher() hook
+
+  // useEffect(() => {
+  //   setLoading(true);
+  //   async function fetchMenu() {
+  //     const menu = await getMenu();
+  //     console.log(menu);
+  //     setMenu(menu);
+  //     setLoading(false);
+  //   }
+  //   fetchMenu();
+  // }, []);
+
+  const fetcher = useFetcher();
+
+  useEffect(() => {
+    if (!fetcher.data && fetcher.state === "idle") {
+      fetcher.load("/menu");
+    }
+  }, [fetcher]);
 
   return (
     <div className="flex flex-col gap-8 px-4 py-4">
@@ -52,7 +79,15 @@ function Order() {
 
       <ul className="divide-y divide-stone-300">
         {cart.map((pizza) => (
-          <OrderItem item={pizza} />
+          <OrderItem
+            key={pizza.pizzaId}
+            item={pizza}
+            isLoadingIngredients={fetcher.state === "loading"}
+            ingredients={
+              fetcher.data?.find((men) => men.id === pizza.pizzaId)
+                ?.ingredients ?? []
+            }
+          />
         ))}
       </ul>
 
@@ -63,6 +98,11 @@ function Order() {
           To pay on delivery: {formatCurrency(orderPrice + priorityPrice)}
         </p>
       </div>
+      {!priority && (
+        <fetcher.Form className="text-right" method="PATCH">
+          <Button type="primary">Make Priority</Button>
+        </fetcher.Form>
+      )}
     </div>
   );
 }
@@ -71,6 +111,12 @@ export async function loader({ params }) {
   const order = await getOrder(params.orderId);
   console.log(order);
   return order;
+}
+
+export async function action({ params }) {
+  const update = { priority: true };
+  await updateOrder(params.orderId, update);
+  return null;
 }
 
 export default Order;

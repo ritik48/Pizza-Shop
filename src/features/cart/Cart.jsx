@@ -1,33 +1,14 @@
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { Link, useFetcher } from "react-router-dom";
+
 import LinkButton from "../../ui/LinkButton";
 import Button from "../../ui/Button";
 import CartItem from "./CartItem";
-import { useDispatch, useSelector } from "react-redux";
 import { getUsername } from "../user/userSlice";
 import { clearCart } from "./cartSlice";
-const fakeCart = [
-  {
-    pizzaId: 12,
-    name: "Mediterranean",
-    quantity: 2,
-    unitPrice: 16,
-    totalPrice: 32,
-  },
-  {
-    pizzaId: 6,
-    name: "Vegetale",
-    quantity: 1,
-    unitPrice: 13,
-    totalPrice: 13,
-  },
-  {
-    pizzaId: 11,
-    name: "Spinach and Mushroom",
-    quantity: 1,
-    unitPrice: 15,
-    totalPrice: 15,
-  },
-];
+import { getMenu } from "../../services/apiRestaurant";
+
 
 function Cart() {
   const cart = useSelector((state) => state.cart.cart);
@@ -46,7 +27,7 @@ function Cart() {
         <>
           <ul className="mt-3 divide-y divide-stone-500 border-b border-stone-500">
             {cart.map((pizza) => (
-              <CartItem item={pizza} />
+              <CartItem item={pizza}  />
             ))}
           </ul>
 
@@ -54,7 +35,9 @@ function Cart() {
             <Button to={"/order/new"} type="primary">
               Order Pizzas
             </Button>
-            <Button type="secondary" onClick={() => dispatch(clearCart())}>Clear Cart</Button>
+            <Button type="secondary" onClick={() => dispatch(clearCart())}>
+              Clear Cart
+            </Button>
           </div>
         </>
       )}
