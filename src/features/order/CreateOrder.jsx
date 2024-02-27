@@ -1,12 +1,14 @@
 import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 
 import { createOrder } from "../../services/apiRestaurant";
 import Button from "../../ui/Button";
 import store from "../../store";
+import { formatCurrency } from "../../utils/helpers";
 
-import { clearCart } from "../cart/cartSlice";
-
+import { clearCart, getTotalAmount } from "../cart/cartSlice";
+import { fetchAddress } from "../user/userSlice";
 
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
@@ -39,13 +41,27 @@ const fakeCart = [
 ];
 
 function CreateOrder() {
-  // const [withPriority, setWithPriority] = useState(false);
+  const [withPriority, setWithPriority] = useState(false);
 
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
-  const cart = useSelector((state) => state.cart.cart)
+  const dispatch = useDispatch();
+
+  const {
+    position: addressPosition,
+    address,
+    status: addressStatus,
+    error: addressError,
+  } = useSelector((state) => state.user);
+
+  const isLoading = addressStatus === "loading";
+
+  const cart = useSelector((state) => state.cart.cart);
   const formErrors = useActionData();
+
+  const totalPrice = useSelector(getTotalAmount);
+  const priorityPrice = withPriority ? totalPrice * 0.2 : 0;
 
   return (
     <div className="sn:px-4 px-6 py-6">
@@ -83,14 +99,34 @@ function CreateOrder() {
 
         <div className="flex flex-col sm:flex-row sm:items-center">
           <label className="sm:basis-40">Address</label>
-          <div className="grow">
+          <div className="relative grow">
             <input
               type="text"
               name="address"
               required
               placeholder="Address"
               className="input w-full"
+              defaultValue={address}
             />
+            {Object.keys(addressPosition).length < 1 && (
+              <div className="absolute right-1 top-1">
+                <Button
+                  type="small"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(fetchAddress());
+                  }}
+                  disabled={isLoading}
+                >
+                  Get Location
+                </Button>
+              </div>
+            )}
+            {addressError && (
+              <p className="mt-2 rounded-md bg-red-100 px-2 py-1 text-xs text-red-700">
+                {addressError}
+              </p>
+            )}
           </div>
         </div>
 
@@ -100,8 +136,8 @@ function CreateOrder() {
             className="h-4 w-4 accent-yellow-500 focus:outline-none focus:ring focus:ring-yellow-500 focus:ring-offset-1"
             name="priority"
             id="priority"
-            // value={withPriority}
-            // onChange={(e) => setWithPriority(e.target.checked)}
+            value={withPriority}
+            onChange={(e) => setWithPriority(e.target.checked)}
           />
           <label htmlFor="priority" className="text-sm">
             Want to yo give your order priority?
@@ -111,7 +147,9 @@ function CreateOrder() {
         <div className="mt-4">
           <input type="hidden" name="cart" value={JSON.stringify(cart)} />
           <Button type="primary" disabled={isSubmitting}>
-            {isSubmitting ? "Placing order..." : "Order Now"}
+            {isSubmitting
+              ? "Placing order..."
+              : `Order Now From ${formatCurrency(totalPrice + priorityPrice)}`}
           </Button>
         </div>
       </Form>
@@ -126,7 +164,7 @@ export async function action({ request }) {
   const order = {
     ...data,
     cart: JSON.parse(data.cart),
-    priority: data.priority === "on",
+    priority: data.priority === true,
   };
 
   const errors = {};
