@@ -16,7 +16,6 @@ function MenuItem({ pizza }) {
   }
 
   const quantityInCart = useSelector(getCurrentQuantityById(id));
-  console.log(quantityInCart);
 
   return (
     <li className="flex gap-3 py-2">
@@ -39,7 +38,10 @@ function MenuItem({ pizza }) {
             </p>
           )}
           {quantityInCart > 0 && !soldOut && (
-            <UpdateQuantity pizzaId={id}>{quantityInCart}</UpdateQuantity>
+            <div className="flex items-center gap-2 sm:gap-5">
+              <UpdateQuantity pizzaId={id}>{quantityInCart}</UpdateQuantity>
+              <DeletePizza pizzaId={id}>Delete</DeletePizza>
+            </div>
           )}
           {quantityInCart < 1 && !soldOut && (
             <Button type="small" onClick={() => handleAddToCart()}>

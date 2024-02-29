@@ -12,11 +12,11 @@ export default function Button({
 
   const styles = {
     primary: base + " px-4 py-3 text-sm",
-    small: base + " px-4 py-1.5 md:py-2 text-sm uppercase",
+    small: base + " px-4 py-1.5 md:py-2 text-xs sm:text-sm uppercase",
     secondary:
       "rounded-full text-sm font-semibold tracking-wide text-stone-500 transition-colors border border-stone-500 duration-300 hover:bg-stone-400 hover:text-stone-800 focus:outline-none focus:ring focus:bg-stone-400 focus:text-stone-800 focus:ring-stone-500 focus:ring-offset-1 disabled:cursor-not-allowed px-4 py-3 uppercase",
-    round: base + " w-8 h-8"
-  
+    round: base + "inline-block w-6 h-6 sm:w-8 sm:h-8",
+    link: "font-semibold text-blue-600 hover:text-blue-400 underline"
   };
 
   if (to) {

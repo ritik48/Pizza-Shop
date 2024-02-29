@@ -108,6 +108,7 @@ function Order() {
 }
 
 export async function loader({ params }) {
+  console.log("hellow")
   const order = await getOrder(params.orderId);
   console.log(order);
   return order;

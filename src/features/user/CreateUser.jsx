@@ -2,7 +2,7 @@ import { useState } from "react";
 import Button from "../../ui/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { createUser } from "./userSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 function CreateUser() {
   const [username, setUsername] = useState("");
@@ -10,13 +10,17 @@ function CreateUser() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const redirectTo = searchParams.get("redirectTo") || "/menu";
+  
   const curUserName = useSelector((state) => state.user.userName);
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!username) return;
     dispatch(createUser(username));
-    navigate("/menu");
+    navigate(redirectTo, {replace: true});
   }
 
   if (curUserName) {
