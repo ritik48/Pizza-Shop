@@ -13,14 +13,14 @@ function CreateUser() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const redirectTo = searchParams.get("redirectTo") || "/menu";
-  
+
   const curUserName = useSelector((state) => state.user.userName);
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!username) return;
     dispatch(createUser(username));
-    navigate(redirectTo, {replace: true});
+    navigate(redirectTo);
   }
 
   if (curUserName) {
